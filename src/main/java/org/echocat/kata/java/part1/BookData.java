@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.boot.autoconfigure.web.WebProperties.Resources;
+import org.springframework.core.io.ClassPathResource;
 //import java.io.ClassLoaderUtil;
 
 /**
@@ -22,7 +25,6 @@ public class BookData {
 	public static List<Book> tuples;
 	
     public static void main(String... args) {
-    	//tuples = readBooksFromCSV("data/tuples.csv");
 
     	loadData();
         // let's print all the person read from CSV file
@@ -32,14 +34,22 @@ public class BookData {
     }
    
     public static void loadData() {
-    	tuples = readBooksFromCSV("data/books.csv");
+    	
+    	try {
+			tuples = readBooksFromCSV("data/books.csv");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
 
     }
     
-    private static List<Book> readBooksFromCSV(String fileName) {
+    private static List<Book> readBooksFromCSV(String fileName) throws IOException {
         List<Book> tuples = new ArrayList<>();
-        //Path pathToFile = Paths.get(fileName);
-        InputStream inputStream = BookData.class.getResourceAsStream(fileName);
+        InputStream inputStream = BookData.class.getResourceAsStream(fileName);//must have same str
+     //   ClassPathResource resource = new ClassPathResource(fileName);
+    //    InputStream inputStream = resource.getInputStream();
         InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         //BufferedReader reader = new BufferedReader(streamReader);
 
@@ -69,6 +79,7 @@ public class BookData {
             }
 
         } catch (IOException ioe) {
+        	System.out.println("Unable to load books from file.");
             ioe.printStackTrace();
         }
 
@@ -126,13 +137,20 @@ class Book {
         this.isbn = isbn;
     }
 
-    /*public String getAuthor() {
-        return author;
+    public String getAuthor() {
+        return String.join(",",authors);
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }*/
+    public void setAuthor(String[] authors) {
+        this.authors = authors;
+    }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     @Override
     public String toString() {
