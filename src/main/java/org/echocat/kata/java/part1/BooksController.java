@@ -15,10 +15,10 @@ public class BooksController {
 	@RequestMapping(path = "/books/{isbn}", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Book> getBook(@PathVariable String isbn) {
-		BookData books=new BookData();
-		  books.loadData();
-		    System.out.println("# Books loaded="+books.tuples.size());
-		    Book res=books.searchIsbn(isbn);
+		//BookData books=new BookData();
+		  //books.loadData();
+		    System.out.println("# Books loaded="+MainApp.books.tuples.size());
+		    Book res=MainApp.books.searchIsbn(isbn);
 		    if(res==null) {
 		  	  //return("There is no book with the entered isbn: "+isbn);	  
 		    	return ResponseEntity.notFound().build();  

@@ -1,17 +1,14 @@
 package org.echocat.kata.java.part1;
 
-// By Adesouki
-// code edited from: https://www.java67.com/2015/08/how-to-load-data-from-csv-file-in-java.html
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.boot.autoconfigure.web.WebProperties.Resources;
-import org.springframework.core.io.ClassPathResource;
+//import java.io.InputStream;
+//import java.io.InputStreamReader;
+//import java.nio.charset.StandardCharsets;
+//import java.util.ArrayList;
+//import java.util.List;
+//
+//import org.springframework.boot.autoconfigure.web.WebProperties.Resources;
+//import org.springframework.core.io.ClassPathResource;
 //import java.io.ClassLoaderUtil;
 
 /**
@@ -21,31 +18,34 @@ import org.springframework.core.io.ClassPathResource;
  * @author WINDOWS 8
  *
  */
-public class BookData {
-	public static List<Book> tuples;
+public class BookData extends TableData{
+	//public static List<Book> tuples;
 	
     public static void main(String... args) {
-
-    	loadData();
+    	BookData books=new BookData();
+    	books.loadData();
         // let's print all the person read from CSV file
-        for (Book b : tuples) {
-            System.out.println(b);
+        for (DbRecord r : books.tuples) {
+        	if (r instanceof Book) {
+        	    Book b = (Book) r;
+        	    System.out.println(b);
+        	}
+            
         }
     }
    
-    public static void loadData() {
+    public void loadData() {
     	
     	try {
-			tuples = readBooksFromCSV("data/books.csv");
+			readFromCSV("data/books.csv",Book.class,2);//2 skip header line
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
 		}
 
     }
     
-    private static List<Book> readBooksFromCSV(String fileName) throws IOException {
+    /*private static List<DbRecord> readBooksFromCSV(String fileName,Class<? extends DbRecord> rectype) throws IOException {
         List<Book> tuples = new ArrayList<>();
         InputStream inputStream = BookData.class.getResourceAsStream(fileName);//must have same str
      //   ClassPathResource resource = new ClassPathResource(fileName);
@@ -68,7 +68,7 @@ public class BookData {
                 // the file, using a comma as the delimiter
                 String[] attributes = line.split(";");
 
-                Book book = createBook(attributes);
+                DbRecord book = rectype.createRecord(attributes);
 
                 // adding book into ArrayList
                 if(book!=null) tuples.add(book);
@@ -79,38 +79,34 @@ public class BookData {
             }
 
         } catch (IOException ioe) {
-        	System.out.println("Unable to load books from file.");
+        	System.out.println("Unable to load from file:"+fileName);
             ioe.printStackTrace();
         }
 
         return tuples;
-    }
+    }*/
 
-    private static Book createBook(String[] metadata) {
-    	if(metadata.length<4) {
-    		System.out.println("invalid record, will be skipped");
-    		return null;
-    	}
-              // create and return book of this metadata
-        return new Book(metadata[0], metadata[1], metadata[2],metadata[3]);
-    }
+    //@Override
+    
 
     public Book searchIsbn(String isbn) {
     	//Book res=null;
-    	for(Book x: tuples) {
-    		if(x.getIsbn().equals(isbn)) {
-    			return(x);
+    	for (DbRecord r : tuples) {
+        	if (r instanceof Book) {
+        		Book b = (Book) r;
+    		if( b.getIsbn().equals(isbn)) {
+    			return(b);
     		}
+        	}
     	}
     	return(null);
     }
 }
 
 
-class Book {
+class Book extends DbRecord{
     private String title;
     private String description;
-    //private int price;
     private String[] authors;
     private String isbn;
 
@@ -120,7 +116,24 @@ class Book {
         this.isbn = isbn;
         this.authors = authors.split(",");
     }
-
+    
+    public Book() {
+    	this.title ="undifined book";
+    }
+     @Override
+      public DbRecord createRecord(String[] metadata) {
+    	if(metadata.length<4) {
+    		System.out.println("invalid record, will be skipped");
+    		return null;
+    	}
+              // create and return book of this metadata
+        //return new Book(metadata[0], metadata[1], metadata[2],metadata[3]);
+    	this.title = metadata[0];
+        this.isbn = metadata[1];
+        this.authors = metadata[2].split(",");
+        this.description = metadata[3];
+        return this;
+    }
     public String getTitle() {
         return title;
     }
@@ -154,7 +167,7 @@ class Book {
 
     @Override
     public String toString() {
-        return "Book [title=" + title + ", isbn=" + isbn + ", author=" + authors
+        return "Book [title=" + title + ", isbn=" + isbn + ", author=" + String.join(",", authors)
                 +" decription="+description+ "]";
     }
 
